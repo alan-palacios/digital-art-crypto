@@ -16,3 +16,4 @@
 
 import signature
 print(signature.hashDocument('sampleText.txt'))
+print(signature.getAgreementMessage('Bob'))

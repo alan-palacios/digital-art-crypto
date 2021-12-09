@@ -1,6 +1,17 @@
 from Crypto.Hash import SHA256
+from datetime import datetime
 
 BLOCK_SIZE=512
+
+def getAuthorMessage(name):
+	today= datetime.now()
+	message= f" This artwork was made by {name} - {today}"
+	return message
+
+def getAgreementMessage(name):
+	today= datetime.now()
+	message= f"Me, {name} agreed to not use this artwork without the consent of its author - {today}"
+	return message
 
 def hashDocument(filename):
 	h = SHA256.new()
