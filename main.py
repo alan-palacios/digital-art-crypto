@@ -1,3 +1,8 @@
+import signature
+
+print(signature.hashDocument('sampleText.txt'))
+print(signature.getAgreementMessage('Bob'))
+
 def askMenuOption():
     validNumber = False
     number = 0
@@ -22,32 +27,24 @@ while not exit:
  
     if option == 1:
         print ("Option 1")
+		#for alice:
+		#sign artwork previously requesting the name of the artist and showing the message of ownership that will be added:
+		#verify final document received by notary
+		#show final document
     elif option == 2:
         print ("Option 2")
+		#for bob:
+		#verify and show document received by alice
+		#sign document of not use without authorization previosly requesting the name
+		#verify final document received by notary
+		#show final document
     elif option == 3:
         print("Option 3")
+		#for notary:
+		#verify and show document received by bob and alice
+		#sign document of validation if the notary decide it 
     elif option == 4:
         exit = True
     else:
         print ("Choose a number among 1 and 3")
 print ("Bye")
-#print(f"You choose {option}")
-
-#for alice:
-#sign artwork previously requesting the name of the artist and showing the message of ownership that will be added:
-#verify final document received by notary
-#show final document
-
-#for bob:
-#verify and show document received by alice
-#sign document of not use without authorization previosly requesting the name
-#verify final document received by notary
-#show final document
-
-#for notary:
-#verify and show document received by bob and alice
-#sign document of validation if the notary decide it 
-
-import signature
-print(signature.hashDocument('sampleText.txt'))
-print(signature.getAgreementMessage('Bob'))
