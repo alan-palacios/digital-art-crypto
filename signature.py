@@ -1,5 +1,6 @@
 from Crypto.Hash import SHA256
 from datetime import datetime
+from base64 import b64encode # or urlsafe_b64decode
 
 BLOCK_SIZE=512
 
@@ -20,7 +21,7 @@ def hashDocument(filename):
 		while len(fb) > 0: # While there is still data being read from the file
 			h.update(fb) # Update the hash
 			fb = f.read(BLOCK_SIZE) # Read the next block from the file
-	return h.hexdigest()
+	return b64encode(h.digest())
 
 #FUNCTIONS:
 #generate private and public passwords
