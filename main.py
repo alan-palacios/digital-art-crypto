@@ -1,12 +1,10 @@
 import signature
 import AES
 
-key = b'12345678901234567890123456789012'
-ciphertext = AES.encrypt(key,'holi')
-print(ciphertext)
-print(AES.decrypt(key,ciphertext))
+key = b'123456789012345678901234'
 print(signature.hashDocument('sampleText.txt'))
-print(signature.getAgreementMessage('Bob'))
+AES.encrypt_file('sampleText.txt.hash', key)
+AES.decrypt_file('sampleText.txt.hash.aesenc', key)
 
 def askMenuOption():
     validNumber = False
@@ -31,7 +29,15 @@ while not exit:
     option = askMenuOption()
  
     if option == 1:
-        print ("Option 1")
+        print ("Option 1.")
+        name = input("Enter your name: ")
+        filename = input("Enter the file name of your artwork: ")
+        print(' '+signature.getAuthorMessage(name, filename))
+        res = input("Do you want authorize and sign the previous message (y/n)? ")
+        if res=='y':
+            print ("Generating digital signature")
+        else:
+            print ("")
 		#for alice:
 		#sign artwork previously requesting the name of the artist and showing the message of ownership that will be added:
 		#verify final document received by notary

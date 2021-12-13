@@ -4,9 +4,9 @@ from base64 import b64encode # or urlsafe_b64decode
 
 BLOCK_SIZE=512
 
-def getAuthorMessage(name):
+def getAuthorMessage(name, filename):
 	today= datetime.now()
-	message= f" This artwork was made by {name} - {today}"
+	message= f"The artwork located in {filename} was made by {name} - {today}|{name}|{filename}"
 	return message
 
 def getAgreementMessage(name):
@@ -21,6 +21,8 @@ def hashDocument(filename):
 		while len(fb) > 0: # While there is still data being read from the file
 			h.update(fb) # Update the hash
 			fb = f.read(BLOCK_SIZE) # Read the next block from the file
+	with open(filename + ".hash", 'wb') as fo:
+		fo.write(b64encode(h.digest()))
 	return b64encode(h.digest())
 
 #FUNCTIONS:
