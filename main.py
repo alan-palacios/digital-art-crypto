@@ -1,5 +1,10 @@
 import signature
+import AES
 
+key = b'12345678901234567890123456789012'
+ciphertext = AES.encrypt(key,'holi')
+print(ciphertext)
+print(AES.decrypt(key,ciphertext))
 print(signature.hashDocument('sampleText.txt'))
 print(signature.getAgreementMessage('Bob'))
 
