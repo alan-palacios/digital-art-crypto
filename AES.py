@@ -12,12 +12,12 @@ def encrypt(data, key):
     return b64encode(iv + cipher.encrypt(pad(data.encode('utf-8'),
         AES.block_size)))
 
-def encrypt_file(filename, key):
+def encrypt_file(filename, key, out_file):
     plaintext=''
     with open(filename, 'r') as fo:
         plaintext = fo.read()
     enc = encrypt(plaintext, key)
-    with open(filename + ".aesenc", 'wb') as fo:
+    with open(out_file, 'wb') as fo:
         fo.write(enc)
     return enc
 
@@ -26,12 +26,12 @@ def decrypt(data, key):
     cipher = AES.new(key, AES.MODE_CBC, raw[:AES.block_size])
     return unpad(cipher.decrypt(raw[AES.block_size:]), AES.block_size)
 
-def decrypt_file(filename, key):
+def decrypt_file(filename, key, out_file):
     plaintext=''
     with open(filename, 'r') as fo:
         plaintext = fo.read()
     dec = decrypt(plaintext, key)
-    with open(filename + ".aesdec", 'wb') as fo:
+    with open(out_file, 'wb') as fo:
         fo.write(dec)
     return dec
 

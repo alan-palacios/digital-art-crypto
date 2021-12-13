@@ -14,14 +14,14 @@ def getAgreementMessage(name):
 	message= f"Me, {name} agreed to not use this artwork without the consent of its author - {today}"
 	return message
 
-def hashDocument(filename):
+def hashDocument(filename, hash_file):
 	h = SHA256.new()
 	with open(filename, 'rb') as f: # Open the file to read it's bytes
 		fb = f.read(BLOCK_SIZE) # Read from the file. Take in the amount declared above
 		while len(fb) > 0: # While there is still data being read from the file
 			h.update(fb) # Update the hash
 			fb = f.read(BLOCK_SIZE) # Read the next block from the file
-	with open(filename + ".hash", 'wb') as fo:
+	with open(hash_file, 'wb') as fo:
 		fo.write(b64encode(h.digest()))
 	return b64encode(h.digest())
 

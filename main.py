@@ -50,16 +50,19 @@ while not exit:
             #Writing author document
             directory=get_directory(artwork_file)
             author_file = directory+"author.txt"
+            hash_file = directory+"hash.txt"
+            enc_file = directory+"aesenc.txt"
+            dec_file = directory+"aesdec.txt"
             write_file(author_file, signature.getAuthorMessage(name, artwork_file))
             #Hash
-            signature.hashDocument(author_file)
+            signature.hashDocument(author_file, hash_file)
             #Generating key
             key_file = directory+"key.aes"
             AES.generate_key(password, key_file)
             key=read_file_bytes(key_file)
             #Encrypt
-            AES.encrypt_file(author_file+'.hash', key)
-            AES.decrypt_file(author_file+'.hash.aesenc', key)
+            AES.encrypt_file(hash_file, key, enc_file)
+            AES.decrypt_file(enc_file, key, dec_file)
             print (f"Done! You can find your files in {directory}")
         else:
             print ("")
