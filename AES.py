@@ -1,3 +1,4 @@
+from Crypto.Hash import SHA256
 from Crypto.Cipher import AES
 from base64 import b64decode
 from base64 import b64encode
@@ -33,3 +34,8 @@ def decrypt_file(filename, key):
     with open(filename + ".aesdec", 'wb') as fo:
         fo.write(dec)
     return dec
+
+def generate_key(password, filename):
+    key = SHA256.new(bytes(password, 'utf-8')).digest()
+    with open(filename, 'wb') as fo:
+        fo.write(key)
