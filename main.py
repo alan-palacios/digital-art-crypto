@@ -27,7 +27,7 @@ def join_files(file1, file2, out):
         data = fp.read()
     with open(file2) as fp:
         data2 = fp.read()
-    data += "\n"
+    data += "@@@"
     data += data2
     with open (out, 'w') as fp:
         fp.write(data)
@@ -66,6 +66,7 @@ while not exit:
             priv_file = directory+f"{name}-private.pem"
             pub_file = directory+f"{name}-public.pem"
             signature_file = directory+"signature.txt"
+            inter_file = directory+"inter.txt"
             dist_file = directory+"dist.txt"
             write_file(author_file, signature.getAuthorMessage(name, artwork_file))
             #Hash
@@ -74,7 +75,8 @@ while not exit:
             RSA.keyGeneration(pub_file, priv_file)
             #Encryption
             RSA.encryption(priv_file, hash_file, signature_file)
-            join_files(signature_file, author_file, dist_file)
+            join_files(signature_file, author_file, inter_file)
+            join_files(inter_file, artwork_file, dist_file)
             print (f"Done! You can find your files in {directory}, share only the dist.txt file")
         else:
             print ("")
