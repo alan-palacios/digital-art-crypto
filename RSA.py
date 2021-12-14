@@ -2,7 +2,7 @@ from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP
 import base64
 
-def keyGeneration():
+def keyGeneration(public_file, private_file):
     #Generar pareja de claves RSA de 2048 bits de longitud
     key = RSA.generate(2048)
 
@@ -10,22 +10,22 @@ def keyGeneration():
     private_key = key.export_key()
 
     #Save the private key in a .pem file
-    with open("public.pem", "wb") as f:
+    with open(public_file, "wb") as f:
         f.write(private_key)
 
     #Obtain the public key
     public_key = key.publickey().export_key()
 
     #Save the public key in a .pem file
-    with open("private.pem", "wb") as f:
+    with open(private_file, "wb") as f:
         f.write(public_key)
 
-def encryption(priv ,s):
+def encryption(priv_file, data, out):
     #Convert the string into bytes
-    byteData = s.encode("ascii")
+    byteData = data.encode("ascii")
 
     #Read the file with the public key
-    with open(priv, "rb") as f:
+    with open(priv_file, "rb") as f:
         recipient_key = f.read()
     key = RSA.importKey(recipient_key)
 
@@ -35,11 +35,14 @@ def encryption(priv ,s):
     #Encrypt the string using the public key
     encData = cipher_rsa.encrypt(byteData)
 
-    return encData
+    #Write file
+    f = open (out,'wb')
+    f.write(base64.b64encode(encData))
+    f.close()
 
-def decryption(pub, encData):
+def decryption(pub_file, encData, out):
     #Read the file with the public key
-    with open(pub, "rb") as f:
+    with open(pub_file, "rb") as f:
         recipient_key = f.read()
     key = RSA.importKey(recipient_key)
     
@@ -52,7 +55,10 @@ def decryption(pub, encData):
     #Convert the byte string to characters
     s = decData.decode("ascii")
 
-    return s
+    #write file
+    f = open (out,'w')
+    f.write(s)
+    f.close()
 
 def readDoc(filetext):
     f = open (filetext,'r')
@@ -77,17 +83,17 @@ def saveDoc2(filetext,text):
     f.write(text)
     f.close()
 
-file_text=input("Nombre del archivo: ")
-file_text2=input("Nombre del archivo para texto cifrado: ")
-file_text3=input("Nombre del archivo para texto descifrado: ")
-
-priv = "private.pem"
-pub = "public.pem"
-
-s = readDoc(file_text)
-keyGeneration()
-cip_text = encryption(priv, s)
-saveDoc(file_text2,cip_text)
-s2 = readDoc2(file_text2)
-dec_text = decryption(pub,s2)
-saveDoc2(file_text3,dec_text)
+#file_text=input("Nombre del archivo: ")
+#file_text2=input("Nombre del archivo para texto cifrado: ")
+#file_text3=input("Nombre del archivo para texto descifrado: ")
+#
+#priv = "private.pem"
+#pub = "public.pem"
+#
+#s = readDoc(file_text)
+#keyGeneration()
+#cip_text = encryption(priv, s)
+#saveDoc(file_text2,cip_text)
+#s2 = readDoc2(file_text2)
+#dec_text = decryption(pub,s2)
+#saveDoc2(file_text3,dec_text)

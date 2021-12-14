@@ -15,7 +15,6 @@ def askMenuOption():
     return number
 def get_directory(filename):
     return os.path.dirname(filename)+"/"
-
 def read_file_bytes(filename):
     with open(filename, 'rb') as fo:
         plaintext = fo.read()
@@ -23,6 +22,15 @@ def read_file_bytes(filename):
 def write_file(filename, data):
     with open(filename, 'w') as fo:
         fo.write(data)
+def join_files(file1, file2, out):
+    with open(file1) as fp:
+        data = fp.read()
+    with open(file2) as fp:
+        data2 = fp.read()
+    data += "\n"
+    data += data2
+    with open (out, 'w') as fp:
+        fp.write(data)
 
 #key = b'123456789012345678901234'
 directory=''
@@ -39,10 +47,14 @@ while not exit:
     option = askMenuOption()
  
     if option == 1:
+		#for alice:
+		#sign artwork previously requesting the name of the artist and showing the message of ownership that will be added:
+		#verify final document received by notary
+		#show final document
         print ("Option 1.")
         name = input("Enter your name: ")
         artwork_file = input("Enter the file name of your artwork: ")
-        password = input("Enter a secret keyword to make the signature: ")
+        #password = input("Enter a secret keyword to make the signature: ")
         print(' '+signature.getAuthorMessage(name, artwork_file))
         res = input("Do you want authorize and sign the previous message (y/n)? ")
         if res=='y':
@@ -51,26 +63,22 @@ while not exit:
             directory=get_directory(artwork_file)
             author_file = directory+"author.txt"
             hash_file = directory+"hash.txt"
-            enc_file = directory+"aesenc.txt"
-            dec_file = directory+"aesdec.txt"
+            priv_file = directory+f"{name}-private.pem"
+            pub_file = directory+f"{name}-public.pem"
+            signature_file = directory+"signature.txt"
+            dist_file = directory+"dist.txt"
             write_file(author_file, signature.getAuthorMessage(name, artwork_file))
             #Hash
             signature.hashDocument(author_file, hash_file)
             #Generating key
-            key_file = directory+"key.aes"
-            AES.generate_key(password, key_file)
-            key=read_file_bytes(key_file)
-            #Encrypt
-            AES.encrypt_file(hash_file, key, enc_file)
-            AES.decrypt_file(enc_file, key, dec_file)
-            print (f"Done! You can find your files in {directory}")
+            RSA.keyGeneration(pub_file, priv_file)
+            #Encryption
+            RSA.encryption(priv_file, hash_file, signature_file)
+            join_files(signature_file, author_file, dist_file)
+            print (f"Done! You can find your files in {directory}, share only the dist.txt file")
         else:
             print ("")
         input("Continue?")
-		#for alice:
-		#sign artwork previously requesting the name of the artist and showing the message of ownership that will be added:
-		#verify final document received by notary
-		#show final document
     elif option == 2:
         print ("Option 2")
         input("Continue?")
