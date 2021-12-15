@@ -79,19 +79,18 @@ while not exit:
             pub_file = directory+f"{name}-public.pem"
             signature_file = directory+"signature.txt"
             inter_file = directory+"inter.txt"
-            dist_file = directory+"dist.txt"
+            final_file = directory+"dist.txt"
             write_file(author_file, getAuthorMessage(name, artwork_file))
             join_files(author_file, artwork_file, inter_file)
             #Generating key
             RSA.keyGeneration(pub_file, priv_file)
             #Encryption
             RSA.signFile(priv_file, pub_file, inter_file, signature_file, hash_file)
-            join_files(signature_file, inter_file, dist_file)
+            join_files(signature_file, inter_file, final_file)
             print (f"Done! You can find your files in {directory}, share only the dist.txt file")
         else:
             print ("")
         input("Continue?")
-
 	#verify signed document:
     elif option == 2:
 		#for bob:
@@ -116,37 +115,37 @@ while not exit:
         pub_file = directory+f"{artist_name}-public.pem"
         verified = RSA.verifySignature(pub_file, data_to_hash, received_signature, directory)
         if(verified):
-            print("The signature is valid!!")
+            #Show received data
+            print("The signature is valid!")
+            print("Check yourself that the received info is correct")
             print("Artist signed Document: ")
             print(received_document)
             print("Received Artwork: ")
             print(received_art)
-
-            #print(' '+signature.getAgreementMessage(name, artist_name))
-            #res = input("Do you want authorize and sign the previous message (y/n)? ")
-            #if res=='y':
-            #    print ("Generating digital signature")
-            #    #Writing author document
-            #    agreement_file = directory+"agree.txt"
-
-            #    hash_file = directory+"hash.txt"
-            #    priv_file = directory+f"{name}-private.pem"
-            #    signature_file = directory+"signature.txt"
-            #    inter_file = directory+"inter.txt"
-            #    dist_file = directory+"dist.txt"
-            #    write_file(author_file, signature.getAuthorMessage(name, artwork_file))
-            #    #Hash
-            #    signature.hashDocument(author_file, hash_file)
-            #    #Generating key
-            #    RSA.keyGeneration(pub_file, priv_file)
-            #    #Encryption
-            #    RSA.encryption(priv_file, hash_file, signature_file)
-            #    join_files(signature_file, author_file, inter_file)
-            #    join_files(inter_file, artwork_file, dist_file)
-            #    print (f"Done! You can find your files in {directory}, share only the dist.txt file")
-            #else:
-            #    print ("")
-            #author_file = directory+"author.txt"
+            #Sign agreement
+            agreeMsg = getAgreementMessage(name, artist_name)
+            print(' '+agreeMsg)
+            res = input("Do you want authorize and sign the previous message (y/n)? ")
+            if res=='y':
+                print ("Generating digital signature")
+                #Writing agree document with the previous file appended
+                agree_file = directory+"agree.txt"
+                hash_file = directory+"hash.txt"
+                priv_file = directory+f"{name}-private.pem"
+                pub_file = directory+f"{name}-public.pem"
+                signature_file = directory+"signature.txt"
+                inter_file = directory+"inter.txt"
+                final_file = directory+"arist-client-agreement.txt"
+                write_file(agree_file, agreeMsg)
+                join_files(agree_file, artist_signed_file, inter_file)
+                #Generating key
+                RSA.keyGeneration(pub_file, priv_file)
+                #Encryption
+                RSA.signFile(priv_file, pub_file, inter_file, signature_file, hash_file)
+                join_files(signature_file, inter_file, final_file)
+                print (f"Done! You can find your files in {directory}, share only the artist-client-agreement.txt file")
+            else:
+                print ("")
         else:
             print("The signature is not valid!!")
         input("Continue?")

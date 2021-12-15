@@ -25,7 +25,6 @@ def signData(priv_file, public_file, hash_data, out_sign, out_hash):
     with open(priv_file, 'r') as f:
         private_key = RSA.import_key(f.read())
     # sign the digest
-    print(hash_data)
     digest = SHA256.new(hash_data.encode('utf8'))
     with open(out_hash, 'wb') as fo:
         fo.write(b64encode(digest.digest()))
@@ -64,23 +63,3 @@ def verifySignature(pub_file, hash_data, signature, directory):
         return True
     except:
         return False
-
-def decryption(pub_file, encData, out):
-    #Read the file with the public key
-    with open(pub_file, "rb") as f:
-        recipient_key = f.read()
-    key = RSA.importKey(recipient_key)
-    
-    #Instance of the cipher
-    cipher_rsa = PKCS1_OAEP.new(key)
-
-    #Decrypt the string using the private key
-    decData = cipher_rsa.decrypt(encData)
-
-    #Convert the byte string to characters
-    s = decData.decode("ascii")
-
-    #write file
-    f = open (out,'w')
-    f.write(s)
-    f.close()
