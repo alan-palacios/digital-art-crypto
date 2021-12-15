@@ -5,17 +5,17 @@ import os
 
 def getAuthorMessage(name, filename):
 	today= datetime.now()
-	message= f"The artwork located in {filename} was made by {name} - {today}|{name}|{filename}"
+	message= f"The artwork located in {filename} was made by {name}|{today}|{name}|{filename}"
 	return message
 
 def getAgreementMessage(name, artist_name):
 	today= datetime.now()
-	message= f"Me, {name} agreed to not use this artwork without the consent of its author {artist_name} - {today}|{name}|{artist_name}"
+	message= f"Me, {name} agreed to not use this artwork without the consent of its author {artist_name}|{today}|{name}|{artist_name}"
 	return message
 
 def getValidationMessage(name, client_name, artist_name):
 	today= datetime.now()
-	message= f"Me {name} as a public notary validate that the current agreement between the artist {artist_name} and the client {client_name} is valid - {today}|{name}|{client_name}|{artist_name}"
+	message= f"Me {name} as a public notary validate that the current agreement between the artist {artist_name} and the client {client_name} is valid|{today}|{name}|{client_name}|{artist_name}"
 	return message
 
 def askMenuOption():
@@ -52,7 +52,6 @@ def join_files(file1, file2, out):
     with open (out, 'w') as fp:
         fp.write(data)
 
-#key = b'123456789012345678901234'
 directory=''
 exit = False
 option = 0
@@ -71,7 +70,6 @@ while not exit:
         print ("Option 1.")
         name = input("Enter your name: ")
         artwork_file = input("Enter the file name of your artwork: ")
-        #password = input("Enter a secret keyword to make the signature: ")
         print(' '+getAuthorMessage(name, artwork_file))
         res = input("Do you want authorize and sign the previous message (y/n)? ")
         if res=='y':
@@ -98,9 +96,6 @@ while not exit:
         input("Continue?")
 	#verify signed document:
     elif option == 2:
-		#for bob:
-		#verify final document received by notary
-		#show final document
         print ("Option 2")
         name = input("Enter your name: ")
         author_file = input("Enter the file name of the signed file by the artist: ")
@@ -152,10 +147,10 @@ while not exit:
         else:
             print("The signature is not valid!!")
         input("Continue?")
+	#for notary:
+	#verify and show document received by bob and alice
+	#sign document of validation if the notary decide it 
     elif option == 3:
-		#for notary:
-		#verify and show document received by bob and alice
-		#sign document of validation if the notary decide it 
         print("Option 3")
         name = input("Enter your name: ")
         agreement_file = input("Enter the file name of the agreement artist-client: ")
@@ -215,10 +210,53 @@ while not exit:
         else:
             print("The signatures are not valid!!")
         input("Continue?")
+	#for bob:
+	#verify final document received by notary
+	#show final document
     elif option == 4:
-		#verify final document received by notary
-		#show final document
         print("Option 3")
+        final_file = input("Enter the file name of the notary document: ")
+        directory=get_directory(final_file)
+        #Reading file values
+        print("Reading file values")
+        file_data = readFile(final_file)
+        data = file_data.split('@@@')
+        notary_signature = data[0]
+        notary_validation = data[1]
+        client_signature = data[2]
+        client_agreement = data[3]
+        artist_signature = data[4]
+        artist_author = data[5]
+        received_art = data[6]
+        data_to_hash_artist = artist_author +'@@@'+ received_art
+        data_to_hash_client = client_agreement +'@@@'+ artist_signature+'@@@'+ data_to_hash_artist
+        data_to_hash_notary = notary_validation +'@@@'+ client_signature+'@@@'+ data_to_hash_client
+        #Verify signature
+        actors_data = notary_validation.split('|')
+        notary_name = actors_data[2]#input("Write the notary name: ")
+        client_name = actors_data[3]#input("Write the client name: ")
+        artist_name = actors_data[4]#input("Write the artist name: ")
+        #geting public keys
+        pub_notary = f"public/{notary_name}-public.pem"
+        pub_artist = f"public/{artist_name}-public.pem"
+        pub_client = f"public/{client_name}-public.pem"
+        verified_notary = RSA.verifySignature(pub_notary, data_to_hash_notary, notary_signature, directory)
+        verified_artist = RSA.verifySignature(pub_artist, data_to_hash_artist, artist_signature, directory)
+        verified_client = RSA.verifySignature(pub_client, data_to_hash_client, client_signature, directory)
+        if( verified_notary and verified_artist and verified_client ):
+            #Show received data
+            print("All the signatures are VALID!")
+            print("Check yourself that the received info is correct")
+            print("Artwork: ")
+            print(received_art)
+            print("Artist signed Document: ")
+            print(artist_author)
+            print("Client signed Document: ")
+            print(client_agreement)
+            print("Notary signed Document: ")
+            print(notary_validation)
+        else:
+            print("The signatures are not valid!!")
         input("Continue?")
     elif option == 5:
         exit = True
