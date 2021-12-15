@@ -4,15 +4,6 @@ from base64 import b64encode # or urlsafe_b64decode
 
 BLOCK_SIZE=512
 
-def getAuthorMessage(name, filename):
-	today= datetime.now()
-	message= f"The artwork located in {filename} was made by {name} - {today}|{name}|{filename}"
-	return message
-
-def getAgreementMessage(name, artist_name):
-	today= datetime.now()
-	message= f"Me, {name} agreed to not use this artwork without the consent of its author {artist_name} - {today}|{name}|{artist_name}"
-	return message
 
 def hashDocument(filename, hash_file):
 	h = SHA256.new()
