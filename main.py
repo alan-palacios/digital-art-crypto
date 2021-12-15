@@ -13,6 +13,11 @@ def getAgreementMessage(name, artist_name):
 	message= f"Me, {name} agreed to not use this artwork without the consent of its author {artist_name} - {today}|{name}|{artist_name}"
 	return message
 
+def getValidationMessage(name, client_name, artist_name):
+	today= datetime.now()
+	message= f"Me {name} as a public notary validate that the current agreement between the artist {artist_name} and the client {client_name} is valid - {today}|{name}|{client_name}|{artist_name}"
+	return message
+
 def askMenuOption():
     validNumber = False
     number = 0
@@ -76,16 +81,16 @@ while not exit:
             author_file = directory+"author.txt"
             hash_file = directory+"hash.txt"
             priv_file = directory+f"{name}-private.pem"
-            pub_file = directory+f"{name}-public.pem"
+            pub_artist = f"public/{name}-public.pem"
             signature_file = directory+"signature.txt"
             inter_file = directory+"inter.txt"
             final_file = directory+"dist.txt"
             write_file(author_file, getAuthorMessage(name, artwork_file))
             join_files(author_file, artwork_file, inter_file)
             #Generating key
-            RSA.keyGeneration(pub_file, priv_file)
+            RSA.keyGeneration(pub_artist, priv_file)
             #Encryption
-            RSA.signFile(priv_file, pub_file, inter_file, signature_file, hash_file)
+            RSA.signFile(priv_file, pub_artist, inter_file, signature_file, hash_file)
             join_files(signature_file, inter_file, final_file)
             print (f"Done! You can find your files in {directory}, share only the dist.txt file")
         else:
@@ -94,17 +99,15 @@ while not exit:
 	#verify signed document:
     elif option == 2:
 		#for bob:
-		#verify and show document received by alice
-		#sign document of not use without authorization previosly requesting the name
 		#verify final document received by notary
 		#show final document
         print ("Option 2")
         name = input("Enter your name: ")
-        artist_signed_file = input("Enter the file name of the signed file by the artist: ")
-        directory=get_directory(artist_signed_file)
+        author_file = input("Enter the file name of the signed file by the artist: ")
+        directory=get_directory(author_file)
         #Reading file values
         print("Reading file values")
-        file_data = readFile(artist_signed_file)
+        file_data = readFile(author_file)
         data = file_data.split('@@@')
         received_signature = data[0]
         received_document = data[1]
@@ -112,8 +115,8 @@ while not exit:
         data_to_hash = received_document +'@@@'+ received_art
         #Verify signature
         artist_name = input("Write the artist name: ")
-        pub_file = directory+f"{artist_name}-public.pem"
-        verified = RSA.verifySignature(pub_file, data_to_hash, received_signature, directory)
+        pub_artist = f"public/{artist_name}-public.pem"
+        verified = RSA.verifySignature(pub_artist, data_to_hash, received_signature, directory)
         if(verified):
             #Show received data
             print("The signature is valid!")
@@ -132,16 +135,16 @@ while not exit:
                 agree_file = directory+"agree.txt"
                 hash_file = directory+"hash.txt"
                 priv_file = directory+f"{name}-private.pem"
-                pub_file = directory+f"{name}-public.pem"
+                pub_client = f"public/{name}-public.pem"
                 signature_file = directory+"signature.txt"
                 inter_file = directory+"inter.txt"
-                final_file = directory+"arist-client-agreement.txt"
+                final_file = directory+"artist-client-agreement.txt"
                 write_file(agree_file, agreeMsg)
-                join_files(agree_file, artist_signed_file, inter_file)
+                join_files(agree_file, author_file, inter_file)
                 #Generating key
-                RSA.keyGeneration(pub_file, priv_file)
-                #Encryption
-                RSA.signFile(priv_file, pub_file, inter_file, signature_file, hash_file)
+                RSA.keyGeneration(pub_client, priv_file)
+                #Sign file
+                RSA.signFile(priv_file, pub_client, inter_file, signature_file, hash_file)
                 join_files(signature_file, inter_file, final_file)
                 print (f"Done! You can find your files in {directory}, share only the artist-client-agreement.txt file")
             else:
@@ -150,11 +153,68 @@ while not exit:
             print("The signature is not valid!!")
         input("Continue?")
     elif option == 3:
-        print("Option 3")
-        input("Continue?")
 		#for notary:
 		#verify and show document received by bob and alice
 		#sign document of validation if the notary decide it 
+        print("Option 3")
+        name = input("Enter your name: ")
+        agreement_file = input("Enter the file name of the agreement artist-client: ")
+        directory=get_directory(agreement_file)
+        #Reading file values
+        print("Reading file values")
+        file_data = readFile(agreement_file)
+        data = file_data.split('@@@')
+        client_signature = data[0]
+        client_agreement = data[1]
+        artist_signature = data[2]
+        artist_author = data[3]
+        received_art = data[4]
+        data_to_hash_artist = artist_author +'@@@'+ received_art
+        data_to_hash_client = client_agreement +'@@@'+ artist_signature+'@@@'+ data_to_hash_artist
+        #Verify signature
+        artist_name = input("Write the artist name: ")
+        client_name = input("Write the client name: ")
+        pub_artist = f"public/{artist_name}-public.pem"
+        pub_client = f"public/{client_name}-public.pem"
+        verified_artist = RSA.verifySignature(pub_artist, data_to_hash_artist, artist_signature, directory)
+        verified_client = RSA.verifySignature(pub_client, data_to_hash_client, client_signature, directory)
+        if( verified_artist and verified_client ):
+            #Show received data
+            print("Both signatures are valid!")
+            print("Check yourself that the received info is correct")
+            print("Artist signed Document: ")
+            print(artist_author)
+            print("Received Artwork: ")
+            print(received_art)
+            print("Client signed Document: ")
+            print(client_agreement)
+            #Sign validation
+            validateMsg = getValidationMessage(name, client_name, artist_name)
+            print(' '+validateMsg)
+            res = input("Do you want to validate the information and sign it (y/n)? ")
+            if res=='y':
+                print ("Generating digital signature")
+                #Writing validate document with the previous file appended
+                validate_file = directory+"validate.txt"
+                hash_file = directory+"hash.txt"
+                priv_notary = directory+f"{name}-private.pem"
+                pub_notary = f"public/{name}-public.pem"
+                signature_file = directory+"signature.txt"
+                inter_file = directory+"inter.txt"
+                final_file = directory+"validated-document.txt"
+                write_file(validate_file, validateMsg)
+                join_files(validate_file, agreement_file, inter_file)
+                #Generating key
+                RSA.keyGeneration(pub_notary, priv_notary)
+                #Sign file
+                RSA.signFile(priv_notary, pub_notary, inter_file, signature_file, hash_file)
+                join_files(signature_file, inter_file, final_file)
+                print (f"Done! You can find your files in {directory}, share only the validated-document.txt file")
+            else:
+                print ("")
+        else:
+            print("The signatures are not valid!!")
+        input("Continue?")
     elif option == 4:
 		#verify final document received by notary
 		#show final document

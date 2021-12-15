@@ -53,9 +53,9 @@ def verifySignature(pub_file, hash_data, signature, directory):
         public_key = RSA.import_key(f.read())
     # sign the digest
     digest = SHA256.new(hash_data.encode('utf8'))
-    out_hash=directory+"artist-hash.txt"
-    with open(out_hash, 'wb') as fo:
-        fo.write(b64encode(digest.digest()))
+    #out_hash=directory+"artist-hash.txt"
+    #with open(out_hash, 'wb') as fo:
+    #    fo.write(b64encode(digest.digest()))
     # verify the digest and signature
     signature = b64decode(signature)
     try:
