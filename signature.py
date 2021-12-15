@@ -9,9 +9,9 @@ def getAuthorMessage(name, filename):
 	message= f"The artwork located in {filename} was made by {name} - {today}|{name}|{filename}"
 	return message
 
-def getAgreementMessage(name):
+def getAgreementMessage(name, artist_name):
 	today= datetime.now()
-	message= f"Me, {name} agreed to not use this artwork without the consent of its author - {today}"
+	message= f"Me, {name} agreed to not use this artwork without the consent of its author {artist_name} - {today}|{name}|{artist_name}"
 	return message
 
 def hashDocument(filename, hash_file):
@@ -25,6 +25,13 @@ def hashDocument(filename, hash_file):
 		fo.write(b64encode(h.digest()))
 	return b64encode(h.digest())
 
+def hashData(data, hash_file):
+	data = bytes(data, 'utf-8')
+	h = SHA256.new()
+	h.update(data) # Update the hash
+	with open(hash_file, 'wb') as fo:
+		fo.write(b64encode(h.digest()))
+	return b64encode(h.digest())
 #FUNCTIONS:
 #generate private and public passwords
 

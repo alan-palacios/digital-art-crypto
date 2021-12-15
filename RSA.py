@@ -1,5 +1,9 @@
+from base64 import b64encode
+from Crypto.Hash import SHA256
+from datetime import datetime
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP
+from Crypto.Signature import pkcs1_15
 import base64
 
 def keyGeneration(public_file, private_file):
@@ -10,14 +14,14 @@ def keyGeneration(public_file, private_file):
     private_key = key.export_key()
 
     #Save the private key in a .pem file
-    with open(public_file, "wb") as f:
+    with open(private_file, "wb") as f:
         f.write(private_key)
 
     #Obtain the public key
     public_key = key.publickey().export_key()
 
     #Save the public key in a .pem file
-    with open(private_file, "wb") as f:
+    with open(public_file, "wb") as f:
         f.write(public_key)
 
 def encryption(priv_file, data, out):
@@ -82,18 +86,35 @@ def saveDoc2(filetext,text):
     f = open (filetext,'w')
     f.write(text)
     f.close()
+def signFile(priv_file, data, out):
+    with open(priv_file, 'r') as f:
+        private_key = RSA.import_key(f.read())
+    digest = SHA256.new(data)
+    signature = pkcs1_15.new(private_key).sign(digest)
+    saveDoc2('digest.txt', digest)
+    print(signature)
+    return signature
+def verifyFile(pub_file, digest, signature, out):
+    with open(pub_file, 'r') as f:
+        public_key = RSA.import_key(f.read())
+    verification = pkcs1_15.new(public_key).verify(digest, signature)
+    print(verification)
 
-#file_text=input("Nombre del archivo: ")
-#file_text2=input("Nombre del archivo para texto cifrado: ")
-#file_text3=input("Nombre del archivo para texto descifrado: ")
-#
-#priv = "private.pem"
-#pub = "public.pem"
-#
-#s = readDoc(file_text)
-#keyGeneration()
-#cip_text = encryption(priv, s)
-#saveDoc(file_text2,cip_text)
-#s2 = readDoc2(file_text2)
-#dec_text = decryption(pub,s2)
-#saveDoc2(file_text3,dec_text)
+keyGeneration('public.pem','private.pem')
+# create a message
+message = 'hello'
+# load private key
+with open('private.pem', 'r') as f:
+    private_key = RSA.import_key(f.read())
+# hash the message
+digest = SHA256.new(message.encode('utf8'))
+# sign the digest
+signature = pkcs1_15.new(private_key).sign(digest)
+# load public key
+with open('public.pem', 'r') as f:
+    public_key = RSA.import_key(f.read())
+# verify the digest and signature
+verified = pkcs1_15.new(public_key).verify(digest, signature)
+# base64 encode the signature
+signature_b64 = b64encode(signature)
+print(signature_b64)
