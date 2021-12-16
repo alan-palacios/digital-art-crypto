@@ -345,10 +345,9 @@ while not exit:
         verifyNotaryDocument()
         input("Continue?")
     elif option == 5:
-        print("Option 5")
+        print("Option 4")
         generateEncryptKeyPair()
         input("Continue?")
-    elif option == 5:
     elif option == 6:
         exit = True
     else:
