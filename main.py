@@ -80,6 +80,7 @@ while not exit:
         cprint ('Option 1.', 'blue')
         name = input("Enter your name: ")
         artwork_file = input("Enter the file name of your artwork: ")
+        client_name = input("Enter the name of your client: ")
         print(' '+getAuthorMessage(name, artwork_file))
         res = input("Do you want authorize and sign the previous message (y/n)? ")
         if res=='y':
@@ -92,18 +93,37 @@ while not exit:
             pub_artist = f"public/{name}-public.pem"
             signature_file = directory+"signature.txt"
             inter_file = directory+"inter.txt"
-            dist_file = directory+"dist.txt"
+            data_file = directory+"data.txt"
             aes_key = directory+"aes-key.txt"
-            enc_file = directory+"dist-enc.txt"
+            aes_key_enc = directory+"aes-key-enc.txt"
+            client_rsa_pub = f"public/{client_name}-enc-public.pem"
+            enc_file = directory+"data-enc.txt"
+            final_file = directory+"dist.txt"
             write_file(author_file, getAuthorMessage(name, artwork_file))
             join_files(author_file, artwork_file, inter_file)
             #Generating key
             RSA.keyGeneration(pub_artist, priv_file)
             #Signature
             RSA.signFile(priv_file, pub_artist, inter_file, signature_file, hash_file)
-            join_files(signature_file, inter_file, dist_file)
+            join_files(signature_file, inter_file, data_file)
+            #generate AES Key
             AES.generate_key(aes_key)
+            #encrypt dist file with AES
+            AES.encrypt_file(data_file, aes_key, enc_file)
+            #encrypt AES Key
+            RSA.encryptFile(client_rsa_pub, aes_key, aes_key_enc )
+            join_files(aes_key_enc, enc_file, final_file)
             print (f"Done! You can find your files in {directory}, share only the dist.txt file")
+            remove = input("Do you want to remove unused process files (y/n)? ")
+            if remove=='y':
+                os.remove(aes_key_enc)
+                os.remove(author_file)
+                os.remove(enc_file)
+                os.remove(hash_file)
+                os.remove(inter_file)
+                os.remove(signature_file)
+            else: 
+                print ("")
         else:
             print ("")
         input("Continue?")

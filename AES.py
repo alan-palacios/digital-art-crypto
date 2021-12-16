@@ -13,8 +13,10 @@ def encrypt(data, key):
     return b64encode(iv + cipher.encrypt(pad(data.encode('utf-8'),
         AES.block_size)))
 
-def encrypt_file(filename, key, out_file):
+def encrypt_file(filename, key_file, out_file):
     plaintext=''
+    with open(key_file, 'rb') as fo:
+        key = b64decode(fo.read())
     with open(filename, 'r') as fo:
         plaintext = fo.read()
     enc = encrypt(plaintext, key)
@@ -39,4 +41,4 @@ def decrypt_file(filename, key, out_file):
 def generate_key( filename):
     key = os.urandom(16) #SHA256.new(bytes(password, 'utf-8')).digest()
     with open(filename, 'wb') as fo:
-        fo.write(key)
+        fo.write(b64encode(key))
