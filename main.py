@@ -56,7 +56,6 @@ def join_files(file1, file2, out):
     with open (out, 'w') as fp:
         fp.write(data)
 def generateEncryptKeyPair():
-    print ("Option 5.")
     name = input("Enter your name: ")
     directory = input("Enter the directory where you want to save your private key: ")
     print ("Generating key pair")
@@ -65,7 +64,6 @@ def generateEncryptKeyPair():
     #Generating key
     RSA.keyGeneration(public_enc_file, private_enc_file)
     print (f"Done! You can find your private key in {directory}")
-    input("Continue?")
 
 def signArt():
     name = input("Enter your name: ")
@@ -384,6 +382,20 @@ def verifyNotaryDocument():
     else:
         print("The signatures are not valid!!")
 
+def deleteDirectoryFiles():
+    dir = 'public'
+    for f in os.listdir(dir):
+        os.remove(os.path.join(dir, f))
+    dir = 'notary'
+    for f in os.listdir(dir):
+        os.remove(os.path.join(dir, f))
+    dir = 'client'
+    for f in os.listdir(dir):
+        os.remove(os.path.join(dir, f))
+    dir = 'artist'
+    for f in os.listdir(dir):
+        if(not f.__contains__("art")):
+            os.remove(os.path.join(dir, f))
 
 directory=''
 exit = False
@@ -401,7 +413,8 @@ while not exit:
     print ("3. Sign agreement not to use without the consent of the artist")
     print ("4. Verify both signs")
     print ("5. View notary document")
-    print ("6. Exit")
+    print ("6. Delete files in directories")
+    print ("7. Exit")
 
     option = askMenuOption()
     if option == 1:
@@ -421,10 +434,14 @@ while not exit:
         verifyBothSignatures()
         input("Continue?")
     elif option == 5:
-        print("Option 4")
+        print("Option 5")
         verifyNotaryDocument()
         input("Continue?")
     elif option == 6:
+        print("Option 6")
+        deleteDirectoryFiles()
+        input("Continue?")
+    elif option == 7:
         exit = True
     else:
         print ("Choose a number among 1 and 5")
