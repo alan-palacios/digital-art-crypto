@@ -4,6 +4,8 @@ import RSA
 import os
 import sys
 from termcolor import colored, cprint
+import subprocess
+subprocess.call('', shell=True)
 
 def getAuthorMessage(name, filename):
 	today= datetime.now()
