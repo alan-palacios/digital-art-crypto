@@ -324,11 +324,28 @@ def verifyBothSignatures():
     else:
         print("The signatures are not valid!!")
 def verifyNotaryDocument():
-    final_file = input("Enter the file name of the notary document: ")
-    directory=get_directory(final_file)
+    name = input("Enter your name: ")
+    notary_enc_file = input("Enter the file name of the notary document: ")
+    directory=get_directory(notary_enc_file)
+
+    priv_rsa_enc = directory+f"{name}-encrypt-private.pem"
+    notary_aes_key = directory+"notary-aes-key.txt"
+    enc_notary_file = directory+"encrypt-notary-msg.txt"
+    notary_msg_file = directory+"notary-msg.txt"
+
+    #Decrypt file
+    enc_file_data = readFile(notary_enc_file)
+    enc_data = enc_file_data.split('@@@')
+    enc_aes_key = enc_data[0]
+    enc_dist = enc_data[1]
+    #decrypt aes key
+    RSA.decryptData(priv_rsa_enc, enc_aes_key, notary_aes_key )
+    write_file(enc_notary_file,enc_dist)
+    AES.decrypt_file(enc_notary_file, notary_aes_key, notary_msg_file)
+
     #Reading file values
     print("Reading file values")
-    file_data = readFile(final_file)
+    file_data = readFile(notary_msg_file)
     data = file_data.split('@@@')
     notary_signature = data[0]
     notary_validation = data[1]
@@ -346,9 +363,9 @@ def verifyNotaryDocument():
     client_name = actors_data[3]#input("Write the client name: ")
     artist_name = actors_data[4]#input("Write the artist name: ")
     #geting public keys
-    pub_notary = f"public/{notary_name}-public.pem"
-    pub_artist = f"public/{artist_name}-public.pem"
-    pub_client = f"public/{client_name}-public.pem"
+    pub_notary = f"public/{notary_name}-sign-public.pem"
+    pub_artist = f"public/{artist_name}-sign-public.pem"
+    pub_client = f"public/{client_name}-sign-public.pem"
     verified_notary = RSA.verifySignature(pub_notary, data_to_hash_notary, notary_signature, directory)
     verified_artist = RSA.verifySignature(pub_artist, data_to_hash_artist, artist_signature, directory)
     verified_client = RSA.verifySignature(pub_client, data_to_hash_client, client_signature, directory)
@@ -379,33 +396,33 @@ while not exit:
     cprint('Tovar Espejo Mariana Josefina', 'green', 'on_blue')
     print("****************************************")  
     print ("Choose what you want to do")  
-    print ("1. Sign your art")
-    print ("2. Sign agreement not to use without the consent of the artist")
-    print ("3. Verify both signs")
-    print ("4. View notary document")
-    print ("5. Generate encryption key pair")
+    print ("1. Generate encryption key pair")
+    print ("2. Sign your art")
+    print ("3. Sign agreement not to use without the consent of the artist")
+    print ("4. Verify both signs")
+    print ("5. View notary document")
     print ("6. Exit")
 
     option = askMenuOption()
     if option == 1:
         cprint ('Option 1.', 'blue')
-        signArt()
+        generateEncryptKeyPair()
         input("Continue?")
     elif option == 2:
         cprint ('Option 2','blue')
-        signAgreement()
+        signArt()
         input("Continue?")
     elif option == 3:
         print("Option 3")
-        verifyBothSignatures()
+        signAgreement()
         input("Continue?")
     elif option == 4:
         print("Option 4")
-        verifyNotaryDocument()
+        verifyBothSignatures()
         input("Continue?")
     elif option == 5:
         print("Option 4")
-        generateEncryptKeyPair()
+        verifyNotaryDocument()
         input("Continue?")
     elif option == 6:
         exit = True
