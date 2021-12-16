@@ -64,10 +64,8 @@ def verifySignature(pub_file, hash_data, signature, directory):
     except:
         return False
 
-def decryptFile(priv_file, data_file, out):
-    #Read the file with the public key
-    with open(data_file, "rb") as f:
-        encData = f.read()
+def decryptData(priv_file, enc_data, out):
+    encData = b64decode(enc_data)
     #Read the file with the public key
     with open(priv_file, "rb") as f:
         recipient_key = f.read()
@@ -78,10 +76,9 @@ def decryptFile(priv_file, data_file, out):
     #Decrypt the string using the private key
     decData = cipher_rsa.decrypt(encData)
     #Convert the byte string to characters
-    s = decData.decode("ascii")
     #write file
-    f = open (out,'w')
-    f.write(s)
+    f = open (out,'wb')
+    f.write(decData)
     f.close()
 
 def encryptFile(pub_file, data_file, out):

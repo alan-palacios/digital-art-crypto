@@ -29,8 +29,10 @@ def decrypt(data, key):
     cipher = AES.new(key, AES.MODE_CBC, raw[:AES.block_size])
     return unpad(cipher.decrypt(raw[AES.block_size:]), AES.block_size)
 
-def decrypt_file(filename, key, out_file):
+def decrypt_file(filename, key_file, out_file):
     plaintext=''
+    with open(key_file, 'rb') as fo:
+        key = b64decode(fo.read())
     with open(filename, 'r') as fo:
         plaintext = fo.read()
     dec = decrypt(plaintext, key)

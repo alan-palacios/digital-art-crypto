@@ -131,8 +131,22 @@ while not exit:
     elif option == 2:
         cprint ('Option 2','blue')
         name = input("Enter your name: ")
-        author_file = input("Enter the file name of the signed file by the artist: ")
-        directory=get_directory(author_file)
+        enc_file = input("Enter the file name of the signed file by the artist: ")
+        directory=get_directory(enc_file)
+        priv_rsa_enc = directory+f"{name}-enc-private.pem"
+        artist_aes_key = directory+"artist-aes-key.text"
+        enc_author_file = directory+"enc-author.text"
+        author_file = directory+"author.text"
+        #Decrypt file
+        enc_file_data = readFile(enc_file)
+        enc_data = enc_file_data.split('@@@')
+        enc_aes_key = enc_data[0]
+        enc_dist = enc_data[1]
+        #decrypt aes key
+        RSA.decryptData(priv_rsa_enc, enc_aes_key, artist_aes_key )
+        write_file(enc_author_file,enc_dist)
+        AES.decrypt_file(enc_author_file,artist_aes_key, author_file)
+        break
         #Reading file values
         print("Reading file values...")
         file_data = readFile(author_file)
