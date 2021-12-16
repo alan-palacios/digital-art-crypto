@@ -2,6 +2,8 @@ from datetime import datetime
 import AES
 import RSA
 import os
+import sys
+from termcolor import colored, cprint
 
 def getAuthorMessage(name, filename):
 	today= datetime.now()
@@ -56,8 +58,13 @@ directory=''
 exit = False
 option = 0
 while not exit:  
+    print("****************************************") 
+    cprint('PROTECTING DIGITAL ART\n', 'green', 'on_blue')
+    cprint('Cipriano Damián Sebastián', 'green', 'on_blue')
+    cprint('Palacios Lugo Alan Yoltic', 'green', 'on_blue')
+    cprint('Tovar Espejo Mariana Josefina', 'green', 'on_blue')
     print("****************************************")  
-    print("Choose what you want to do")  
+    print ("Choose what you want to do")  
     print ("1. Sign your art")
     print ("2. Sign agreement not to use without the consent of the artist")
     print ("3. Verify both signs")
@@ -67,13 +74,13 @@ while not exit:
     option = askMenuOption()
 	#sign art:
     if option == 1:
-        print ("Option 1.")
+        cprint ('Option 1.', 'blue')
         name = input("Enter your name: ")
         artwork_file = input("Enter the file name of your artwork: ")
         print(' '+getAuthorMessage(name, artwork_file))
         res = input("Do you want authorize and sign the previous message (y/n)? ")
         if res=='y':
-            print ("Generating digital signature")
+            print ("Generating digital signature...")
             #Writing author document
             directory=get_directory(artwork_file)
             author_file = directory+"author.txt"
@@ -96,12 +103,12 @@ while not exit:
         input("Continue?")
 	#verify signed document:
     elif option == 2:
-        print ("Option 2")
+        cprint ('Option 2','blue')
         name = input("Enter your name: ")
         author_file = input("Enter the file name of the signed file by the artist: ")
         directory=get_directory(author_file)
         #Reading file values
-        print("Reading file values")
+        print("Reading file values...")
         file_data = readFile(author_file)
         data = file_data.split('@@@')
         received_signature = data[0]
@@ -114,11 +121,11 @@ while not exit:
         verified = RSA.verifySignature(pub_artist, data_to_hash, received_signature, directory)
         if(verified):
             #Show received data
-            print("The signature is valid!")
+            cprint('The signature is valid!', 'green')
             print("Check yourself that the received info is correct")
-            print("Artist signed Document: ")
+            cprint('Artist signed Document: ', 'magenta')
             print(received_document)
-            print("Received Artwork: ")
+            print('Received Artwork: ', 'magenta')
             print(received_art)
             #Sign agreement
             agreeMsg = getAgreementMessage(name, artist_name)
