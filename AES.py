@@ -1,3 +1,4 @@
+import os
 from Crypto.Hash import SHA256
 from Crypto.Cipher import AES
 from base64 import b64decode
@@ -35,7 +36,7 @@ def decrypt_file(filename, key, out_file):
         fo.write(dec)
     return dec
 
-def generate_key(password, filename):
-    key = SHA256.new(bytes(password, 'utf-8')).digest()
+def generate_key( filename):
+    key = os.urandom(16) #SHA256.new(bytes(password, 'utf-8')).digest()
     with open(filename, 'wb') as fo:
         fo.write(key)

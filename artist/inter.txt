@@ -1,1 +1,1 @@
-The artwork located in artist/art.txt was made by alice|2021-12-15 11:28:52.866413|alice|artist/art.txt@@@This is the art document
+The artwork located in artist/art.txt was made by alice|2021-12-15 13:48:49.011107|alice|artist/art.txt@@@This is the art document

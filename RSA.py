@@ -63,3 +63,35 @@ def verifySignature(pub_file, hash_data, signature, directory):
         return True
     except:
         return False
+
+def decryptFile(pub_file, encData, out):
+    #Read the file with the public key
+    with open(pub_file, "rb") as f:
+        recipient_key = f.read()
+    key = RSA.importKey(recipient_key)
+    
+    #Instance of the cipher
+    cipher_rsa = PKCS1_OAEP.new(key)
+    #Decrypt the string using the private key
+    decData = cipher_rsa.decrypt(encData)
+    #Convert the byte string to characters
+    s = decData.decode("ascii")
+    #write file
+    f = open (out,'w')
+    f.write(s)
+    f.close()
+
+def encryptFile(priv_file, data, out):
+    #Convert the string into bytes
+    byteData = data.encode("ascii")
+
+    #Read the file with the public key
+    with open(priv_file, "rb") as f:
+        recipient_key = f.read()
+    key = RSA.importKey(recipient_key)
+
+    #Instance of the cipher
+    cipher_rsa = PKCS1_OAEP.new(key)
+
+    #Encrypt the string using the public key
+    encData = cipher_rsa.encrypt(byteData)

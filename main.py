@@ -62,7 +62,8 @@ while not exit:
     print ("2. Sign agreement not to use without the consent of the artist")
     print ("3. Verify both signs")
     print ("4. View notary document")
-    print ("5. Exit")
+    print ("5. Generate encryption key pair")
+    print ("6. Exit")
 
     option = askMenuOption()
 	#sign art:
@@ -82,14 +83,17 @@ while not exit:
             pub_artist = f"public/{name}-public.pem"
             signature_file = directory+"signature.txt"
             inter_file = directory+"inter.txt"
-            final_file = directory+"dist.txt"
+            dist_file = directory+"dist.txt"
+            aes_key = directory+"aes-key.txt"
+            enc_file = directory+"dist-enc.txt"
             write_file(author_file, getAuthorMessage(name, artwork_file))
             join_files(author_file, artwork_file, inter_file)
             #Generating key
             RSA.keyGeneration(pub_artist, priv_file)
-            #Encryption
+            #Signature
             RSA.signFile(priv_file, pub_artist, inter_file, signature_file, hash_file)
-            join_files(signature_file, inter_file, final_file)
+            join_files(signature_file, inter_file, dist_file)
+            AES.generate_key(aes_key)
             print (f"Done! You can find your files in {directory}, share only the dist.txt file")
         else:
             print ("")
@@ -259,6 +263,17 @@ while not exit:
             print("The signatures are not valid!!")
         input("Continue?")
     elif option == 5:
+        print ("Option 5.")
+        name = input("Enter your name: ")
+        directory = input("Enter the directory where you want to save your private key: ")
+        print ("Generating key pair")
+        private_enc_file = directory+f"/{name}-enc-private.pem"
+        public_enc_file = f"public/{name}-enc-public.pem"
+        #Generating key
+        RSA.keyGeneration(public_enc_file, private_enc_file)
+        print (f"Done! You can find your private key in {directory}")
+        input("Continue?")
+    elif option == 6:
         exit = True
     else:
         print ("Choose a number among 1 and 5")
