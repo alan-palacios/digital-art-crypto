@@ -121,9 +121,10 @@ def signAgreement():
     enc_file = input("Enter the file name of the signed file by the artist: ")
     directory=get_directory(enc_file)
     priv_rsa_enc = directory+f"{name}-encrypt-private.pem"
-    artist_aes_key = directory+"artist-aes-key.text"
-    enc_author_file = directory+"encrypt-artist-msg.text"
-    author_file = directory+"artist-msg.text"
+    artist_aes_key = directory+"artist-aes-key.txt"
+    enc_author_file = directory+"encrypt-artist-msg.txt"
+    author_file = directory+"artist-msg.txt"
+
     #Decrypt file
     enc_file_data = readFile(enc_file)
     enc_data = enc_file_data.split('@@@')
@@ -168,11 +169,13 @@ def signAgreement():
             pub_client = f"public/{name}-sign-public.pem"
             signature_file = directory+"client-signature.txt"
             inter_file = directory+"client-inter.txt"
+            #Encrypt files
             aes_key = directory+"client-aes-key.txt"
             aes_key_enc = directory+"client-aes-key-enc.txt"
             data_file = directory+"client-data.txt"
             data_enc_file = directory+"client-data-enc.txt"
             notary_rsa_pub = f"public/{notary_name}-encrypt-public.pem"
+
             final_file = directory+"client-dist.txt"
             write_file(agree_file, agreeMsg)
             join_files(agree_file, author_file, inter_file)
@@ -188,7 +191,7 @@ def signAgreement():
             AES.encrypt_file(data_file, aes_key, data_enc_file)
             #encrypt AES Key
             RSA.encryptFile(notary_rsa_pub, aes_key, aes_key_enc )
-            join_files(aes_key_enc, enc_file, final_file)
+            join_files(aes_key_enc, data_enc_file, final_file)
 
             print (f"Done! You can find your files in {directory}, share only the artist-client-agreement.txt file")
         else:
@@ -208,11 +211,27 @@ def signAgreement():
         print("The signature is not valid!!")
 def verifyBothSignatures():
     name = input("Enter your name: ")
-    agreement_file = input("Enter the file name of the agreement artist-client: ")
-    directory=get_directory(agreement_file)
+    client_enc_file = input("Enter the file name of the agreement artist-client: ")
+    directory=get_directory(client_enc_file)
+
+    priv_rsa_enc = directory+f"{name}-encrypt-private.pem"
+    client_aes_key = directory+"client-aes-key.txt"
+    enc_client_file = directory+"encrypt-client-msg.txt"
+    client_msg_file = directory+"client-msg.txt"
+
+    #Decrypt file
+    enc_file_data = readFile(client_enc_file)
+    enc_data = enc_file_data.split('@@@')
+    enc_aes_key = enc_data[0]
+    enc_dist = enc_data[1]
+    #decrypt aes key
+    RSA.decryptData(priv_rsa_enc, enc_aes_key, client_aes_key )
+    write_file(enc_client_file,enc_dist)
+    AES.decrypt_file(enc_client_file, client_aes_key, client_msg_file)
+
     #Reading file values
     print("Reading file values")
-    file_data = readFile(agreement_file)
+    file_data = readFile(client_msg_file)
     data = file_data.split('@@@')
     client_signature = data[0]
     client_agreement = data[1]
@@ -224,8 +243,8 @@ def verifyBothSignatures():
     #Verify signature
     artist_name = input("Write the artist name: ")
     client_name = input("Write the client name: ")
-    pub_artist = f"public/{artist_name}-public.pem"
-    pub_client = f"public/{client_name}-public.pem"
+    pub_artist = f"public/{artist_name}-sign-public.pem"
+    pub_client = f"public/{client_name}-sign-public.pem"
     verified_artist = RSA.verifySignature(pub_artist, data_to_hash_artist, artist_signature, directory)
     verified_client = RSA.verifySignature(pub_client, data_to_hash_client, client_signature, directory)
     if( verified_artist and verified_client ):
@@ -245,22 +264,62 @@ def verifyBothSignatures():
         if res=='y':
             print ("Generating digital signature")
             #Writing validate document with the previous file appended
-            validate_file = directory+"validate.txt"
-            hash_file = directory+"hash.txt"
-            priv_notary = directory+f"{name}-private.pem"
-            pub_notary = f"public/{name}-public.pem"
-            signature_file = directory+"signature.txt"
-            inter_file = directory+"inter.txt"
-            final_file = directory+"validated-document.txt"
+            validate_file = directory+"notary-msg.txt"
+            hash_file = directory+"notary-hash.txt"
+            priv_notary = directory+f"{name}-sign-private.pem"
+            pub_notary = f"public/{name}-sign-public.pem"
+            signature_file = directory+"notary-signature.txt"
+            inter_file = directory+"notary-inter.txt"
+            #Encrypt files
+            aes_key = directory+"notary-aes-key.txt"
+            aes_key_enc_artist = directory+"notary-aes-key-enc-artist.txt"
+            aes_key_enc_client = directory+"notary-aes-key-enc-client.txt"
+            data_file = directory+"notary-data.txt"
+            data_enc_file = directory+"notary-data-enc.txt"
+            #diferent encryption key based on the receiver
+            artist_rsa_pub = f"public/{artist_name}-encrypt-public.pem"
+            client_rsa_pub = f"public/{client_name}-encrypt-public.pem"
+
+            #file for artist
+            final_file_artist = directory+"notary-dist-artist.txt"
+            #file for client
+            final_file_client = directory+"notary-dist-client.txt"
+
             write_file(validate_file, validateMsg)
-            join_files(validate_file, agreement_file, inter_file)
+            join_files(validate_file, client_msg_file, inter_file)
             #Generating key
             RSA.keyGeneration(pub_notary, priv_notary)
             #Sign file
             RSA.signFile(priv_notary, pub_notary, inter_file, signature_file, hash_file)
-            join_files(signature_file, inter_file, final_file)
-            print (f"Done! You can find your files in {directory}, share only the validated-document.txt file")
+            join_files(signature_file, inter_file, data_file)
+            #generate AES Key
+            AES.generate_key(aes_key)
+            #encrypt dist file with AES
+            AES.encrypt_file(data_file, aes_key, data_enc_file)
+
+            #encrypt AES Key for artist
+            RSA.encryptFile(artist_rsa_pub, aes_key, aes_key_enc_artist )
+            join_files(aes_key_enc_artist, data_enc_file, final_file_artist)
+            #encrypt AES Key for client
+            RSA.encryptFile(client_rsa_pub, aes_key, aes_key_enc_client )
+            join_files(aes_key_enc_client, data_enc_file, final_file_client)
+
+            print (f"Done! You can find your files in {directory}")
+            print (f"Share notary-dist-artist.txt file with the artist")
+            print (f"Share notary-dist-client.txt file with the client")
         else:
+            print ("")
+        remove = input("Do you want to remove files generated during process (y/n)? ")
+        if remove=='y':
+            os.remove(enc_client_file)
+            os.remove(validate_file)
+            os.remove(hash_file)
+            os.remove(inter_file)
+            os.remove(signature_file)
+            os.remove(aes_key_enc_artist)
+            os.remove(aes_key_enc_client)
+            os.remove(data_enc_file)
+        else: 
             print ("")
     else:
         print("The signatures are not valid!!")
