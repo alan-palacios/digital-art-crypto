@@ -2,6 +2,8 @@ from datetime import datetime
 import AES
 import RSA
 import os
+import img
+import base64
 import sys
 from termcolor import colored, cprint
 import subprocess
@@ -55,6 +57,16 @@ def join_files(file1, file2, out):
     data += data2
     with open (out, 'w') as fp:
         fp.write(data)
+
+def join_files2(file1, file2, out):
+    with open(file1) as fp:
+        data = fp.read()
+    data2 = img.image2str(file2)
+    data += "@@@"
+    data += str(data2)
+    with open (out, 'w') as fp:
+        fp.write(data)
+
 def generateEncryptKeyPair():
     name = input("Enter your name: ")
     directory = input("Enter the directory where you want to save your private key: ")
@@ -88,7 +100,7 @@ def signArt():
         enc_file = directory+"artist-data-enc.txt"
         final_file = directory+"artist-dist.txt"
         write_file(author_file, getAuthorMessage(name, artwork_file))
-        join_files(author_file, artwork_file, inter_file)
+        join_files2(author_file, artwork_file, inter_file)
         #Generating key
         RSA.keyGeneration(pub_artist, priv_file)
         #Signature
@@ -122,6 +134,7 @@ def signAgreement():
     artist_aes_key = directory+"artist-aes-key.txt"
     enc_author_file = directory+"encrypt-artist-msg.txt"
     author_file = directory+"artist-msg.txt"
+    artist_img = directory+"artist-image.jpg"
 
     #Decrypt file
     enc_file_data = readFile(enc_file)
@@ -152,8 +165,8 @@ def signAgreement():
         print("Check yourself that the received info is correct")
         cprint('Artist signed Document: ', 'magenta')
         print(received_document)
-        print('Received Artwork: ', 'magenta')
-        print(received_art)
+        print("You can check the artwork sent to you by the artist, the file is in your folder and its name is artist-image.jpg")
+        img.str2img(received_art,artist_img)
         #Sign agreement
         agreeMsg = getAgreementMessage(name, artist_name)
         print(' '+agreeMsg)
@@ -216,7 +229,7 @@ def verifyBothSignatures():
     client_aes_key = directory+"client-aes-key.txt"
     enc_client_file = directory+"encrypt-client-msg.txt"
     client_msg_file = directory+"client-msg.txt"
-
+    client_img = directory+"client-image.jpg"
     #Decrypt file
     enc_file_data = readFile(client_enc_file)
     enc_data = enc_file_data.split('@@@')
@@ -251,8 +264,8 @@ def verifyBothSignatures():
         print("Check yourself that the received info is correct")
         print("Artist signed Document: ")
         print(artist_author)
-        print("Received Artwork: ")
-        print(received_art)
+        print("You can check the artwork sent to you by the client, the file is in your folder and its name is client-image.jpg")
+        img.str2img(received_art,client_img)
         print("Client signed Document: ")
         print(client_agreement)
         #Sign validation
@@ -330,6 +343,7 @@ def verifyNotaryDocument():
     notary_aes_key = directory+"notary-aes-key.txt"
     enc_notary_file = directory+"encrypt-notary-msg.txt"
     notary_msg_file = directory+"notary-msg.txt"
+    notary_img = directory+"notary-image.jpg"
 
     #Decrypt file
     enc_file_data = readFile(notary_enc_file)
@@ -371,8 +385,8 @@ def verifyNotaryDocument():
         #Show received data
         print("All the signatures are VALID!")
         print("Check yourself that the received info is correct")
-        print("Artwork: ")
-        print(received_art)
+        print("You can check the artwork sent to you by the notary, the file is in your folder and its name is notary-image.jpg")
+        img.str2img(received_art,notary_img)
         print("Artist signed Document: ")
         print(artist_author)
         print("Client signed Document: ")
@@ -446,4 +460,3 @@ while not exit:
     else:
         print ("Choose a number among 1 and 5")
 print ("Bye")
-

@@ -17,15 +17,7 @@ def readBin(fileBin):
     return byte
 
 def str2img(byte, imgFile):  
+    byte = byte[2:len(byte)-1]
     decodeit = open(imgFile, 'wb')
     decodeit.write(base64.b64decode((byte)))
     decodeit.close()
-
-img=input("Nombre del archivo: ")
-bin=input("Nombre del archivo para bin: ")
-img2=input("Nombre del archivo para nueva imagen: ")
-
-aux = image2str(img)
-saveFile(bin, aux)
-aux2 = readBin(bin)
-str2img(aux2, img2)
